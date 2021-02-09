@@ -1,0 +1,61 @@
+version: '3.2'
+
+services:
+  redis:
+    image: redis
+    container_name: cache
+    ports:
+      - "6379:6379"
+
+  backend1:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      - redis
+    volumes:
+      - ./logs/backend1:/usr/src/app/log
+    env_file:
+      - .env
+
+  backend2:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    ports:
+      - "3002:3001"
+    depends_on:
+      - redis
+    volumes:
+      - ./logs/backend2/:/usr/src/app/log
+    env_file:
+      - .env
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend1
+      - backend2
+    env_file:
+      - frontend.env
+  
+  loadbalancer:
+    image: nginx:latest
+    container_name: loadbalancer
+    restart: unless-stopped
+    depends_on: 
+      - backend1
+      - backend2
+      - frontend
+    volumes:
+      - ./loadbalancer/nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt/:/etc/letsencrypt
+    ports:
+      - 80:80
+      - 443:443
