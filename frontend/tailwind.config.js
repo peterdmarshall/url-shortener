@@ -10,6 +10,11 @@ module.exports = {
   theme: {
     extend: {}
   },
-  variants: {},
+  variants: {
+    extend: {
+      textColor: ['active'],
+      backgroundColor: ['active'],
+    }
+  },
   plugins: []
 }

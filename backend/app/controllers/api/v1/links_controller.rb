@@ -1,7 +1,7 @@
 require 'digest'
 
 class Api::V1::LinksController < ApplicationController
-    before_action :check_login, only: [:create, :show, :index]
+    before_action :check_login, only: [:create, :show, :index, :destroy]
 
     def short_url_redirect
         # Get short URL from params
@@ -17,12 +17,12 @@ class Api::V1::LinksController < ApplicationController
                 REDIS.del(access_link_params[:short_url])
 
                 # Lazily delete the link from db
-                Link.delay.delete_all({ :short_url => cached_link['short_url'] })
+                Delayed::Job.enqueue(DeleteLinkJob.new(access_link_params[:short_url]))
                 
                 head :not_found
             else
-                # Lazily update the access count using delayed_job gem
-                Link.delay.find_one_and_update({ "$inc" => { access_count: 1 }, "$set" => { last_access_date: Time.now }})
+                # Lazily update the access count using delayed_job
+                Delayed::Job.enqueue(UpdateLinkAccessJob.new(access_link_params[:short_url]))
 
                 # Redirect to cached url
                 redirect_to cached_link['long_url']
@@ -32,11 +32,15 @@ class Api::V1::LinksController < ApplicationController
 
             # Match, so check if expired, then update usage stats, and redirect
             if link
-                # If link has expired return 404
-                head :not_found && link.delete if link.expired?
 
-                # Lazily update the access count using delayed_job gem
-                Link.delay.find_one_and_update({ "$inc" => { access_count: 1 }, "$set" => { last_access_date: Time.now }})
+                if link.expired?
+                    # Lazily delete the link from db
+                    Delayed::Job.enqueue(DeleteLinkJob.new(access_link_params[:short_url]))
+                    head :not_found
+                end
+
+                # Lazily update the access count using delayed_job
+                Delayed::Job.enqueue(UpdateLinkAccessJob.new(access_link_params[:short_url]))
 
                 # Set the link object in the cache with expiry of 1 day
                 REDIS.set(access_link_params[:short_url], link.to_json, ex: 86400)
@@ -51,7 +55,8 @@ class Api::V1::LinksController < ApplicationController
     end
 
     # GET /api/v1/links
-    # Params ?limit=10&offset=10
+    # Params: limit, offset
+    # Return a list of the links that belong to the current user
     def index
         limit = params[:limit] || 10
         offset = params[:offset] || 0
@@ -60,9 +65,11 @@ class Api::V1::LinksController < ApplicationController
         # Use skip and offset for pagination
         user_links = @current_user.links.skip(offset.to_i).limit(limit.to_i)
 
-        render json: { links: user_links }
+        render json: { link_count: user_links.count, links: user_links }
     end
 
+    # GET /api/v1/links/:id
+    # Return link document if it exists
     def show    
         # Check the database for the Link
         link = Links.find_by(short_url: params[:id])
@@ -74,6 +81,19 @@ class Api::V1::LinksController < ApplicationController
         end
     end
 
+    # DELETE /api/v1/links/:id
+    # Delete the link document if it exists
+    def destroy
+        link = Link.find_by(short_url: params[:id])
+
+        if link && link.remove
+            # Successful delete response
+            head :no_content
+        else
+            # Delete error response
+            render json: { 'error': 'The link does not exist'}, status: :not_found
+        end
+    end 
 
     # POST /api/v1/links
     # Create a link based on the provided params
@@ -92,13 +112,31 @@ class Api::V1::LinksController < ApplicationController
 
         @expiry = create_link_params[:expiry] || nil
 
-        # Generate short url
-        short_url = generate_short_url(create_link_params[:url])
-        link = Link.create(short_url: short_url, long_url: create_link_params[:url], user: @current_user, expiry: @expiry)
-        render json: link, status: :ok
+        retry_count = 0
+
+        loop do
+            # Generate short url
+            short_url = generate_short_url(create_link_params[:url])
+
+            # Create short url document
+            link = Link.new(short_url: short_url, long_url: create_link_params[:url], user: @current_user, expiry: @expiry)
+
+            # Retry if the link does not save
+            if link.save
+                render json: link, status: :ok
+                break
+            elsif retry_count == 3
+                # Only retry 3 times
+                render json: { 'error': 'Failed to create short link' }, status: :bad_request
+                break
+            end
+
+            # Increase retry count
+            retry_count += 1
+        end
     end
 
-    private
+    private 
 
     # Basic validation of url
     # Returns boolean 
@@ -107,10 +145,7 @@ class Api::V1::LinksController < ApplicationController
         uri = URI.parse(url)
 
         # Check that url is a HTTP URI and has a non-nil host
-        uri.is_a?(URI::HTTP) && !uri.host.nil?
-        rescue
-            # Return false on exception
-            false
+        uri.is_a?(URI::HTTP) && !uri.host.nil? rescue false
     end
 
     def generate_short_url(url)
