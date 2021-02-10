@@ -105,7 +105,7 @@ export default function AnalyticsPage() {
                             Analytics
                         </h1>
                         <p class="text-xl mt-4">
-                            View, share, and delete your links. Access tracking lets you know how many people you reach.
+                            View, share, and delete your links. Access tracking lets you monitor traffic.
                         </p>
                     </div>
                     <div class="flex flex-col w-full mt-2">
@@ -156,7 +156,7 @@ export default function AnalyticsPage() {
                                             <tr>
                                                 <td></td>
                                                 <td></td>
-                                                <td class="flex flex-row items-end w-full justify-end">
+                                                <td class="flex flex-row items-end w-full justify-center">
                                                     <span class="text-indigo-900">
                                                         <FontAwesomeIcon icon={faCircleNotch} size='3x' spin/>
                                                     </span>

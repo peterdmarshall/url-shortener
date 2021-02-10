@@ -43,7 +43,7 @@ services:
       - backend1
       - backend2
     env_file:
-      - frontend.env
+      - .env
   
   loadbalancer:
     image: nginx:latest

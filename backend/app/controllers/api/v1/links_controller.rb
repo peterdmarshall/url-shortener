@@ -13,7 +13,7 @@ class Api::V1::LinksController < ApplicationController
             cached_link = JSON.parse(cached_link)
             puts cached_link
 
-            if cached_link[:expiry] && cached_link[:expiry] < Time.now
+            if cached_link[:expiry] && cached_link[:expiry] < Date.today
                 REDIS.del(access_link_params[:short_url])
 
                 # Lazily delete the link from db
@@ -63,7 +63,7 @@ class Api::V1::LinksController < ApplicationController
 
         # Retrieve all links that belong to user
         # Use skip and offset for pagination
-        user_links = @current_user.links.skip(offset.to_i).limit(limit.to_i)
+        user_links = @current_user.links.order_by(:_id.desc).skip(offset.to_i).limit(limit.to_i)
 
         render json: { link_count: user_links.count, links: user_links }
     end
@@ -93,7 +93,7 @@ class Api::V1::LinksController < ApplicationController
             # Delete error response
             render json: { 'error': 'The link does not exist'}, status: :not_found
         end
-    end 
+    end
 
     # POST /api/v1/links
     # Create a link based on the provided params

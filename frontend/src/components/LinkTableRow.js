@@ -50,14 +50,16 @@ const LinkTableRow = (props) => {
                         >
                             {window.location.protocol + '//' + window.location.hostname + '/' + link.short_url}
                         </a>
-                        <CopyToClipboard text={link.short_link}>
-                            <Tippy content={<span class="shadow text-white bg-gray-400 rounded px-1 py-1">Copy Link</span>} placement="right">
-                                <span 
-                                    class="cursor-pointer text-gray-400 font-bold hover:text-gray-800 hover:border-black-400 focus:outline-none active:text-gray-300 ml-4"
-                                >   
-                                    <FontAwesomeIcon icon={faCopy} size='1x'/>
-                                </span>
-                            </Tippy>
+                        <CopyToClipboard text={window.location.protocol + '//' + window.location.hostname + '/' + link.short_url}>
+                            <div class="flex items-center justify-center">
+                                <Tippy content={<span class="shadow text-white bg-gray-400 rounded px-1 py-1">Copy Link</span>} placement="right">
+                                    <span 
+                                        class="cursor-pointer text-gray-400 font-bold hover:text-gray-800 hover:border-black-400 focus:outline-none active:text-gray-300 ml-4"
+                                    >   
+                                        <FontAwesomeIcon icon={faCopy} size='1x'/>
+                                    </span>
+                                </Tippy>
+                            </div>
                         </CopyToClipboard>
                     </div>
                 </div>
@@ -71,14 +73,16 @@ const LinkTableRow = (props) => {
                         >
                             {link.long_url}
                         </a>
-                        <CopyToClipboard text={link.short_link}>
-                            <Tippy content={<span class="shadow text-white bg-gray-400 rounded px-1 py-1">Copy Link</span>} placement="right">
-                                <span 
-                                    class="cursor-pointer text-gray-400 font-bold hover:text-gray-800 hover:border-black-400 focus:outline-none active:text-gray-300 ml-4"
-                                >   
-                                    <FontAwesomeIcon icon={faCopy} size='1x'/>
-                                </span>
-                            </Tippy>
+                        <CopyToClipboard text={link.long_url}>
+                            <div class="flex items-center justify-center">
+                                <Tippy content={<span class="shadow text-white bg-gray-400 rounded px-1 py-1">Copy Link</span>} placement="right">
+                                    <span 
+                                        class="cursor-pointer text-gray-400 font-bold hover:text-gray-800 hover:border-black-400 focus:outline-none active:text-gray-300 ml-4"
+                                    >   
+                                        <FontAwesomeIcon icon={faCopy} size='1x'/>
+                                    </span>
+                                </Tippy>
+                            </div>
                         </CopyToClipboard>
                     </div>
                 </div>

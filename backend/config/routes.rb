@@ -7,6 +7,8 @@ Rails.application.routes.draw do
       get '/user', to: 'users#show'
       get '/user/api_key', to: 'users#show_api_key'
       post '/user/api_key', to: 'users#create_api_key'
+      delete '/user/links', to: 'users#destroy_links'
+      delete '/user', to: 'users#destroy'
     end
   end
 end

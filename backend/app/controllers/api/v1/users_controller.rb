@@ -19,7 +19,7 @@ class Api::V1::UsersController < ApplicationController
         end
     end
 
-    # POST /api/v1/users/api_key
+    # POST /api/v1/user/api_key
     # Generates API key for user, overwrites existing
     def create_api_key
         loop do
@@ -39,6 +39,30 @@ class Api::V1::UsersController < ApplicationController
             render json: { api_key: @current_user.api_key }
         else
             render json: { error: 'Failed to generate api_key for user' }
+        end
+    end
+
+    # DELETE /api/v1/user/links
+    # Deletes all links for the current user
+    def destroy_links
+        user_links = @current_user.links
+        user_links.each do |link|
+            # Queue a job to delete each link
+            Delayed::Job.enqueue(DeleteLinkJob.new(link.short_url))
+        end
+
+        # Indicate that the deletion has been queued
+        head :accepted
+    end
+
+    # DELETE /api/v1/user
+    # Deletes the current user data
+    def destroy
+        user = @current_user
+        if user.destroy
+            head :no_content
+        else
+            head :bad_request
         end
     end
 end

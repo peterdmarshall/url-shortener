@@ -18,9 +18,11 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 export default function SettingsPage() {
 
-    const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
+    const { user, isAuthenticated, getAccessTokenSilently, logout } = useAuth0();
     const [apiKey, setApiKey] = useState("");
     const [generating, setGenerating] = useState(false);
+    const [deletingLinks, setDeletingLinks] = useState(false);
+    const [deletingAccount, setDeletingAccount] = useState(false);
     const [copied, setCopied] = useState(false);
 
     // Get user API_KEY
@@ -77,6 +79,55 @@ export default function SettingsPage() {
             () => setCopied(false),
             2000
         );
+    }
+
+    const deleteAllLinks = async () => {
+        setDeletingLinks(true);
+
+        // Check if user is authenticated
+        if(isAuthenticated && user) {
+            // Make API call using auth0 api key
+            const token = await getAccessTokenSilently();
+
+            axios.delete(process.env.REACT_APP_API_URL + '/api/v1/user/', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then((response) => {
+                console.log(response);
+                setDeletingLinks(false);
+            })
+            .catch((error) => {
+                console.log(error);
+                setDeletingLinks(false);
+            })
+        }
+    }
+
+    const deleteAccountAndLogout = async () => {
+        setDeletingAccount(true);
+
+        // Check if user is authenticated
+        if(isAuthenticated && user) {
+            // Make API call using auth0 api key
+            const token = await getAccessTokenSilently();
+
+            axios.delete(process.env.REACT_APP_API_URL + '/api/v1/user/', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then((response) => {
+                console.log(response);
+                setDeletingAccount(false);
+                logout({ returnTo: window.location.origin })
+            })
+            .catch((error) => {
+                console.log(error);
+                setDeletingAccount(false);
+            })
+        }
     }
 
     return (
@@ -138,15 +189,17 @@ export default function SettingsPage() {
                                     { !copied &&
                                         <CopyToClipboard 
                                             text={apiKey}
+                                            onCopy={setCopyState}
                                         >
-                                            <Tippy content={<span class="shadow text-white bg-gray-400 rounded px-1 py-1">Copy Link</span>}>
-                                                <span 
-                                                    class="cursor-pointer text-gray-400 px-1 py-3 font-bold hover:text-gray-800 hover:border-black-400 focus:outline-none ml-4"
-                                                    onClick={setCopyState}
-                                                >   
-                                                    <FontAwesomeIcon icon={faCopy} size='2x'/>
-                                                </span>
-                                            </Tippy>
+                                            <div class="flex items-center justify-center">
+                                                <Tippy content={<span class="shadow text-white bg-gray-400 rounded px-1 py-1">Copy</span>}>
+                                                    <span 
+                                                        class="cursor-pointer text-gray-400 px-1 py-3 font-bold hover:text-gray-800 hover:border-black-400 focus:outline-none ml-4"
+                                                    >
+                                                        <FontAwesomeIcon icon={faCopy} size='2x'/>
+                                                    </span>
+                                                </Tippy>
+                                            </div>
                                         </CopyToClipboard>
                                         }
                                         { copied &&
@@ -159,26 +212,74 @@ export default function SettingsPage() {
                                         </Tippy>
                                     }
                                     { !generating &&
-                                    <button
-                                        class="bg-indigo-600 font-bold rounded py-3 px-5 mx-3 text-white"
-                                        onClick={generateApiKey}
-                                    >
-                                        {apiKey ? "Reset" : "Generate"}
-                                    </button>
+                                        <button
+                                            class="bg-indigo-600 font-bold rounded py-3 px-5 mx-3 text-white"
+                                            onClick={generateApiKey}
+                                        >
+                                            {apiKey ? "Reset" : "Generate"}
+                                        </button>
                                     }
                                     { generating &&
-                                    <button
-                                        class="bg-indigo-600 font-bold rounded py-3 px-5 mx-3 text-white"
-                                        disabled
-                                    >
-                                        <span class="text-indigo-900 mx-auto">
-                                            <FontAwesomeIcon icon={faCircleNotch} size='2x' spin/>
-                                        </span>
-                                    </button>
+                                        <button
+                                            class="bg-indigo-600 font-bold rounded py-3 px-5 mx-3 text-white"
+                                            disabled
+                                        >
+                                            <span class="text-indigo-900 mx-auto">
+                                                <FontAwesomeIcon icon={faCircleNotch} size='2x' spin/>
+                                            </span>
+                                        </button>
                                     }
                                 </div>
                                 <p class="my-4">
                                     It's simple to use, just include it in the Authorization header when accessing our API.
+                                </p>
+                                <div class="flex mt-12 mb-2 items-center justify-center">
+                                    { !deletingLinks &&
+                                    <button 
+                                        class='bg-indigo-600 text-white font-bold py-4 px-5 rounded hover:text-indigo-800 hover:border-black-400 focus:outline-none'
+                                        onClick={deleteAllLinks}
+                                    >
+                                        Delete All Links
+                                    </button>
+                                    }
+                                    { deletingLinks &&
+                                        <button 
+                                            class='bg-indigo-600 text-white font-bold py-4 px-5 rounded hover:text-indigo-800 hover:border-black-400 focus:outline-none'
+                                            disabled
+                                        >
+                                            Deleting
+                                            <span class="text-indigo-900 mx-2">
+                                                <FontAwesomeIcon icon={faCircleNotch} size='1x' spin/>
+                                            </span>
+                                        </button>
+                                    }
+                                </div>
+                                <p class="my-0">
+                                    Want a fresh start? Delete all of the links that belong to your account.
+                                </p>
+                                <div class="flex mt-8 mb-2 items-center justify-center">
+                                    { !deletingAccount &&
+                                        <button 
+                                            class='bg-red-500 text-white font-bold py-4 px-5 rounded hover:text-red-800 hover:border-black-400 focus:outline-none'
+                                            onClick={deleteAccountAndLogout}
+                                        >
+                                            Delete Account
+                                        </button>
+                                    }
+                                    { deletingAccount &&
+                                        <button 
+                                            class='bg-red-500 text-white font-bold py-4 px-5 rounded hover:text-red-800 hover:border-black-400 focus:outline-none'
+                                            disabled
+                                        >
+                                            Deleting
+                                            <span class="text-red-800 mx-2">
+                                                <FontAwesomeIcon icon={faCircleNotch} size='1x' spin/>
+                                            </span>
+                                        </button>
+                                    }
+                                </div>
+                                <p class="my-0">
+                                    Clear all of your data and delete your account.
                                 </p>
                             </div>
                         </div>

@@ -226,7 +226,7 @@ export default function MainPage() {
                                                 <DatePicker class="border border-gray-500" selected={expiryDate} onChange={date => setExpiryDate(date)} autoFocus/>
                                             </div>
                                         </div>
-                                        <p class="text-sm text-gray-400">After this time your shortened link will no longer work.</p>
+                                        <p class="text-sm text-gray-400">After this date your shortened link will no longer work.</p>
                                         
                                         <span onClick={() => toggleAdvancedOptions(false)} class="cursor-pointer text-gray-400 mx-auto">
                                             <FontAwesomeIcon icon={faChevronUp} size='2x'/>
@@ -261,15 +261,17 @@ export default function MainPage() {
                                 { !copied &&
                                 <CopyToClipboard 
                                     text={shortLink}
+                                    onCopy={setCopyState}
                                 >
-                                    <Tippy content={<span class="shadow text-white bg-gray-400 rounded px-1 py-1">Copy Link</span>}>
-                                        <span 
-                                            class="cursor-pointer text-gray-400 px-1 py-3 font-bold hover:text-gray-800 hover:border-black-400 focus:outline-none ml-4"
-                                            onClick={setCopyState}
-                                        >   
-                                            <FontAwesomeIcon icon={faCopy} size='2x'/>
-                                        </span>
-                                    </Tippy>
+                                    <div class="flex items-center justify-center">
+                                        <Tippy content={<span class="shadow text-white bg-gray-400 rounded px-1 py-1">Copy Link</span>}>
+                                            <span 
+                                                class="cursor-pointer text-gray-400 px-1 py-3 font-bold hover:text-gray-800 hover:border-black-400 focus:outline-none ml-4"
+                                            >   
+                                                <FontAwesomeIcon icon={faCopy} size='2x'/>
+                                            </span>
+                                        </Tippy>
+                                    </div>
                                 </CopyToClipboard>
                                 }
                                 { copied &&

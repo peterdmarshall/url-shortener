@@ -17,7 +17,7 @@ class Link
   # Helper method to check expiry of link
   def expired?
     if expiry
-      return expiry < Time.now 
+      return expiry < Date.today
     else
       return false
     end
