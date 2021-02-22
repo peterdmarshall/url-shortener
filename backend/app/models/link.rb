@@ -12,6 +12,7 @@ class Link
 
   belongs_to :user, index: true
 
+  # Index Links on their short_url
   index({ short_url: 1}, { unique: true })
 
   # Helper method to check expiry of link

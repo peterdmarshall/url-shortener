@@ -12,6 +12,8 @@ class AuthorizationService
 
     private
 
+    # Return the JWT access token from Auth header
+    # if it exists
     def http_token
         if @headers['Authorization'].present?
             # Get the auth token from the Authorization header

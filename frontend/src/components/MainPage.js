@@ -133,7 +133,7 @@ export default function MainPage() {
 
     return (
         <div class="bg-indigo-200">
-            <div class="container flex flex-col h-screen overflow-y-hidden mx-auto space-y-40">
+            <div class="container flex flex-col h-screen overflow-y-hidden mx-auto lg:space-y-40 space-y-10">
                 <div class="flex flex-col flex-1 h-full">
                     <header class="flex-shrink-0 border-b">
                         <div class="flex items-center justify-between p-2 w-full">
@@ -173,14 +173,14 @@ export default function MainPage() {
                         </div>
                     </header>
                 </div>
-                <div class="flex flex-col items-center h-screen justify-start space-y-40">
-                    <div class="flex flex-col items-center justify-center w-full mt-10">
-                        <h1 class="lg:text-7xl md:text-6xl sm:text-4xl text-2xl text-center">
+                <div class="flex flex-col items-center h-screen justify-start">
+                    <div class="flex flex-col items-center justify-center w-full lg:mt-10 my-4">
+                        <h1 class="lg:text-7xl md:text-6xl text-4xl text-center">
                             Shorter links get more clicks.
                         </h1>
                     </div>
                     { !showShort &&
-                    <div class="flex flex-col items-center justify-center w-full mx-0 my-10">
+                    <div class="flex flex-col items-center justify-center w-full mx-0 lg:my-10 my-4">
                         <div class="shadow-xl bg-white max-w-3xl rounded-lg w-full">
                             <div class="flex flex-col items-center">
                                 <h1 class="text-4xl font-bold font-black mb-4 mt-12">Shorten your link.</h1>
@@ -247,7 +247,7 @@ export default function MainPage() {
                     </div>
                     }
                     { showShort &&
-                    <div class="flex flex-col items-center justify-center w-full mx-0 my-10">
+                    <div class="flex flex-col items-center justify-center w-full mx-0 lg:my-10 my-4">
                         <div class="flex flex-col shadow-xl p-12 bg-white max-w-xl rounded-lg w-full">
                             <div class="flex">
                                 <input class="input border border-gray-400 text-gray-800 appearance-none rounded w-full px-3 py-3 text-2xl focus focus:border-indigo-600 focus:outline-none active:outline-none active:border-indigo-600" 

@@ -1,5 +1,6 @@
 module Authenticable
 
+    # Set the current user based on Authorization header
     def current_user
         return @current_user if @current_user
 
@@ -33,7 +34,6 @@ module Authenticable
             render json: { error: "The token does not have a valid issuer." }, status: :forbidden
         rescue JWT::InvalidIatError
             render json: { error: "The token does not have a valid 'issue at' time." }, status: :forbidden
-
     end
 
     protected

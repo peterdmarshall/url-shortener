@@ -3,6 +3,8 @@ require 'digest'
 class Api::V1::LinksController < ApplicationController
     before_action :check_login, only: [:create, :show, :index, :destroy]
 
+    # GET /:short_url
+    # Redirect the user to the short URL with the provided id
     def short_url_redirect
         # Get short URL from params
 
@@ -148,12 +150,13 @@ class Api::V1::LinksController < ApplicationController
         uri.is_a?(URI::HTTP) && !uri.host.nil? rescue false
     end
 
-    def generate_short_url(url)
-        # Generate MD5 hash of URL to get a 128 bit hash value
+
+    # Generate MD5 hash of URL to get a 128 bit hash value
         # Then Base64 encode and take the first 6 letters. This gives us
         # approximately 64^6 = ~68.7 billion possible short urls
         # There will be some collisions since we are taking first 6 letters
         # but this is unlikely
+    def generate_short_url(url)
 
         # Generate random salt
         salt = SecureRandom.hex(12)
