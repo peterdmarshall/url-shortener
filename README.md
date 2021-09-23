@@ -1,17 +1,14 @@
 ## URL Shortener
-URL shorteners are useful when posting long and complicated links to social networking sites like twitter,
-or when sharing a URL through a physical medium like a flyer where it will be copied by hand.
+This is a URL shortener, like https://bitly.com/
 
-# API
+## Frontend
+A React application with TailwindCSS for styling and Auth0 for authentication.
 
-```GET /s/:short_url```
-Returns a 302 redirect to the long url that corresponds to the provided short url.
-Returns a 404 Not Found if there is no valid mapping for the short url.
-
-```POST /api/v1/url```
-```headers: { API_KEY: VALID_API_KEY }```
-```body: { url: URL_TO_SHORTEN }```
-Creates a new short url for the provided long url and returns it.
-Returns with 403 Unauthorized if the API_KEY is invalid. 
-Returns with 429 too many requests if the rate limit has been reached for
-the provided API_KEY
+## Backend
+A JSON Rails API application that shortens URLs and stores the mappings from short URL to original URL. Implements caching with Redis to improve performance of URL redirects, as well as click analytics for URLs that are shortened by a logged-in user.
+Features:
+ - User Accounts
+ - Custom short urls
+ - Caching
+ - Click Analytics
+ - API Key support
